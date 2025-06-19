@@ -40,7 +40,7 @@ inline void chengeLogSource(const LogSource &log_source) {
     }
 }
 
-unsigned long get_log_count() {
+inline unsigned long get_log_count() {
     static unsigned long log_number = 0;
     return log_number++;
 }
