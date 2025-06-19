@@ -1,0 +1,16 @@
+{
+    "name": "uno_target_hal",
+    "version": "1.0",
+    "frameworks": "arduino",
+    "platforms": [
+        "atmelavr"
+    ],
+    "build": {
+        "includeDir": "include",
+        "srcDir": "src",
+        "srcFilter": [
+        ],
+        "flags": [
+        ]
+    }
+}
