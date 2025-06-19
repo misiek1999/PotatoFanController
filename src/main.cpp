@@ -2,6 +2,7 @@
 #include <LiquidCrystal.h>
 #include "log.h"       // Logging library
 #include "project_pin_definition.h" // Pin definitions for the project
+#include "pin_duplication_check.h" // Pin duplication check
 #include "temperature_sensor.h" // Temperature sensor library
 
 Sensor::TemperatureSensor external_sensor(EXTERNAL_DS18B20_PIN); // Initialize temperature sensor on external sensor pin
