@@ -52,7 +52,8 @@ using PinArray = pin_check::Array<unsigned,
     SELECT_BUTTON_PIN,
     NEXT_BUTTON_PIN,
     INCREASE_BUTTON_PIN,
-    DECREASE_BUTTON_PIN
+    DECREASE_BUTTON_PIN,
+    RELAY_PIN
 >;
 
 // Check for duplicates using template metaprogramming
@@ -62,7 +63,8 @@ static constexpr bool has_duplicates = pin_check::CheckDuplicates<
     PinArray::values[3], PinArray::values[4], PinArray::values[5],
     PinArray::values[6], PinArray::values[7], PinArray::values[8],
     PinArray::values[9], PinArray::values[10], PinArray::values[11],
-    PinArray::values[12], PinArray::values[13], PinArray::values[14]
+    PinArray::values[12], PinArray::values[13], PinArray::values[14],
+    PinArray::values[15]
 >::value;
 
 // Trigger compiler error if duplicates exist
