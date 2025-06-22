@@ -15,7 +15,7 @@ constexpr auto LCD_D7_PIN           = 7U;   // Data pin D7 for LCD
 constexpr auto LCD_BACKLIGHT_PIN    = 10U;  // Backlight pin for LCD
 
 // Analog button
-constexpr auto ANALOG_BUTTON_PIN    = A0;   // Analog pin for button input
+constexpr auto KEYPAD_ANALOG_BUTTON_PIN    = A0;   // Analog pin for button input
 
 // Digital pins
 constexpr auto BEFORE_BUTTON_PIN    = A1;   // Before button pin
