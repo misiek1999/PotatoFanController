@@ -7,7 +7,7 @@
     ],
     "build": {
         "includeDir": "include",
-        "srcDir": "src",
+        "srcDir": "source",
         "srcFilter": [
         ],
         "flags": [
