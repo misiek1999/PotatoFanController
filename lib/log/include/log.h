@@ -11,7 +11,7 @@ enum class LogSource {
 };
 
 inline void initLog() {
-    Log.begin(LOG_LEVEL_INFO, &Serial);
+    Log.begin(LOG_LEVEL_TRACE, &Serial);
     Log.noticeln("Log initialized");
 }
 
@@ -60,9 +60,18 @@ inline unsigned long get_log_count() {
 )
 #endif
 
+#ifdef ENABLE_LOGGING
 #define LOG_ERROR(MSG, ...) Log.errorln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define LOG_WARNING(MSG, ...) Log.warningln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define LOG_NOTICE(MSG, ...) Log.noticeln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define LOG_INFO(MSG, ...) Log.infoln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define LOG_DEBUG(MSG, ...) Log.traceln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define LOG_VERBOSE(MSG, ...) Log.verboseln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#else
+#define LOG_ERROR(MSG, ...)
+#define LOG_WARNING(MSG, ...)
+#define LOG_NOTICE(MSG, ...)
+#define LOG_INFO(MSG, ...)
+#define LOG_DEBUG(MSG, ...)
+#define LOG_VERBOSE(MSG, ...)
+#endif
