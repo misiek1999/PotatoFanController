@@ -4,6 +4,7 @@
 #include "project_pin_definition.h" // Pin definitions for the project
 #include "pin_duplication_check.h" // Pin duplication check
 #include "temperature_sensor.h" // Temperature sensor library
+#include "gpio_manager.h"
 
 Sensor::TemperatureSensor external_sensor(EXTERNAL_DS18B20_PIN); // Initialize temperature sensor on external sensor pin
 Sensor::TemperatureSensor internal_sensor(INTERNAL_DS18B20_PIN); // Initialize temperature sensor on internal sensor pin
@@ -17,9 +18,15 @@ void setup() {
     while (!Serial);  // Wait for Serial to be ready
     initLog();        // Initialize the logging system
 
+    //initialize GPIO pins
+    if (!GPIO::initGPIO()) {
+        LOG_ERROR("Failed to initialize GPIO pins!");
+        return; // Exit setup if GPIO initialization fails
+    }
     // Initialize the temperature sensor
     external_sensor.begin();
     internal_sensor.begin();
+    LOG_INFO("Setup completed successfully");
 }
 
 void loop() {
@@ -41,6 +48,11 @@ void loop() {
         } else {
             LOG_ERROR("Internal temperature sensor not connected!");
         }
+        const auto res = GPIO::isKeypadDownPressed(); // Check if the keypad down button is pressed
+        GPIO::isKeypadUpPressed();   // Check if the keypad up button is pressed
+        GPIO::isKeypadSelectPressed(); // Check if the keypad select button is pressed
+        GPIO::isKeypadNextPressed(); // Check if the keypad next button is pressed
+        GPIO::isKeypadPrevPressed(); // Check if the keypad previous button is pressed
         delay(1000);  // Wait for a second
     }
 }
