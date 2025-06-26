@@ -11,7 +11,7 @@ enum class LogSource {
 };
 
 inline void initLog() {
-    Log.begin(LOG_LEVEL_TRACE, &Serial);
+    Log.begin(LOG_LEVEL_VERBOSE, &Serial);
     Log.noticeln("Log initialized");
 }
 
@@ -40,10 +40,7 @@ inline void chengeLogSource(const LogSource &log_source) {
     }
 }
 
-inline unsigned long get_log_count() {
-    static unsigned long log_number = 0;
-    return log_number++;
-}
+inline unsigned long log_number = {};
 
 // logCount [timestamp[ms]] filename:line_number - message
 #define LOG_PREFIX "%l [%l] %s:%d- "
@@ -61,12 +58,12 @@ inline unsigned long get_log_count() {
 #endif
 
 #ifdef ENABLE_LOGGING
-#define LOG_ERROR(MSG, ...) Log.errorln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_WARNING(MSG, ...) Log.warningln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_NOTICE(MSG, ...) Log.noticeln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_INFO(MSG, ...) Log.infoln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_DEBUG(MSG, ...) Log.traceln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_VERBOSE(MSG, ...) Log.verboseln(LOG_PREFIX MSG, get_log_count(), LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_ERROR(MSG, ...) Log.errorln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_WARNING(MSG, ...) Log.warningln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_NOTICE(MSG, ...) Log.noticeln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_INFO(MSG, ...) Log.infoln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_DEBUG(MSG, ...) Log.traceln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_VERBOSE(MSG, ...) Log.verboseln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #else
 #define LOG_ERROR(MSG, ...)
 #define LOG_WARNING(MSG, ...)
