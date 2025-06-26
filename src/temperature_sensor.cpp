@@ -1,6 +1,6 @@
 #include "temperature_sensor.h"
 
-#include <log.h>
+#include "log.h"
 
 constexpr auto kMaxTempRes = 12U; // Maximum resolution for DS18B20 (12 bits)
 
