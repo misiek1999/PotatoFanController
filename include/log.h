@@ -57,13 +57,21 @@ inline unsigned long log_number = {};
 )
 #endif
 
+// Arduino RAM optimization macros
+#if defined(__AVR_ATmega328P__)
+#include <Arduino.h>
+#define RAM_OPT(ARG) F(ARG)
+#else
+#define RAM_OPT(ARG) ARG
+#endif
+
 #ifdef ENABLE_LOGGING
-#define LOG_ERROR(MSG, ...) Log.errorln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_WARNING(MSG, ...) Log.warningln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_NOTICE(MSG, ...) Log.noticeln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_INFO(MSG, ...) Log.infoln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_DEBUG(MSG, ...) Log.traceln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
-#define LOG_VERBOSE(MSG, ...) Log.verboseln(LOG_PREFIX MSG, log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_ERROR(MSG, ...) Log.errorln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_WARNING(MSG, ...) Log.warningln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_NOTICE(MSG, ...) Log.noticeln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_INFO(MSG, ...) Log.infoln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_DEBUG(MSG, ...) Log.traceln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_VERBOSE(MSG, ...) Log.verboseln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #else
 #define LOG_ERROR(MSG, ...)
 #define LOG_WARNING(MSG, ...)
