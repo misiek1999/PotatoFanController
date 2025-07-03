@@ -85,7 +85,7 @@ namespace HAL {
     bool isKeypadPrevPressed() {
         // Check if the keypad previous button is pressed
         const auto analogKeypadKey = analogRead(KEYPAD_ANALOG_BUTTON_PIN);
-        return analogKeypadKey >= 300 && analogKeypadKey < 500;
+        return analogKeypadKey >= 350 && analogKeypadKey < 500;
     }
 
     bool isKeypadSelectPressed() {
@@ -103,7 +103,7 @@ namespace HAL {
     bool isKeypadDownPressed() {
         const auto analogKeypadKey = analogRead(KEYPAD_ANALOG_BUTTON_PIN);
         // Check if the keypad down button is pressed
-        return analogKeypadKey >= 150 && analogKeypadKey < 300;
+        return analogKeypadKey >= 150 && analogKeypadKey < 350;
     }
     #endif  // USE_ANALOG_KEYPAD
 
