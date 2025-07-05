@@ -18,11 +18,11 @@ constexpr auto LCD_BACKLIGHT_PIN    = 10U;  // Backlight pin for LCD
 constexpr auto KEYPAD_ANALOG_BUTTON_PIN    = A0;   // Analog pin for button input
 
 // Digital pins
-constexpr auto BEFORE_BUTTON_PIN    = A1;   // Before button pin
-constexpr auto SELECT_BUTTON_PIN    = A2;   // Select button pin
-constexpr auto NEXT_BUTTON_PIN      = A3;   // Next button pin
-constexpr auto INCREASE_BUTTON_PIN  = A4;   // Increase button pin
-constexpr auto DECREASE_BUTTON_PIN  = A5;   // Decrease button pin
+constexpr auto SELECT_BUTTON_PIN    = A1;   // Select button pin
+constexpr auto DECREASE_BUTTON_PIN  = A2;   // Decrease button pin
+constexpr auto INCREASE_BUTTON_PIN  = A3;   // Increase button pin
+constexpr auto BEFORE_BUTTON_PIN    = A4;   // Before button pin
+constexpr auto NEXT_BUTTON_PIN      = A5;   // Next button pin
 
 // Relay control
 constexpr auto RELAY_PIN            = 12U;  // Pin for relay control
