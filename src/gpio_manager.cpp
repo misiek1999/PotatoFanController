@@ -2,6 +2,10 @@
 #include "gpio_hal.h"  // Include GPIO hal header
 #include "log.h"
 
+#include <Arduino.h>
+
+#define MAX_TRACKED_BUTTONS 8
+
 namespace GPIO {
 
     bool initGPIO() {
@@ -23,39 +27,128 @@ namespace GPIO {
         HAL::setBacklight(state);
     }
 
-    bool isButtonPressed(uint16_t buttonPin) {
+    bool isButtonActive(uint16_t buttonPin) {
         const auto result = HAL::isButtonPressed(buttonPin);
         LOG_DEBUG("Checking if button on pin %d is pressed: %s", buttonPin, result ? "YES" : "NO");
         return result;
     }
 
+    // For generic button pins
+    bool isButtonPressed(uint16_t buttonPin) {
+        constexpr uint32_t DEBOUNCE_MS = 50;   // adjust as needed
+
+        static uint16_t  trackedPins[MAX_TRACKED_BUTTONS]    = {0};
+        static bool      lastStates[MAX_TRACKED_BUTTONS]     = {false};
+        static uint32_t  lastTimestamps[MAX_TRACKED_BUTTONS] = {0};
+        static uint8_t   trackedCount                       = 0;
+
+        // find or add this pin in our arrays
+        uint8_t index = 0;
+        for (; index < trackedCount; ++index) {
+            if (trackedPins[index] == buttonPin) {
+                break;
+            }
+        }
+        if (index == trackedCount) {
+            if (trackedCount >= MAX_TRACKED_BUTTONS) {
+                LOG_ERROR("Max button tracking reached for pin: %d", buttonPin);
+                exit(1);
+            }
+            trackedPins[trackedCount]    = buttonPin;
+            lastStates[trackedCount]     = HAL::isButtonPressed(buttonPin);
+            lastTimestamps[trackedCount] = millis();
+            ++trackedCount;
+        }
+
+        // read current state
+        bool    currentState = HAL::isButtonPressed(buttonPin);
+        bool    risingEdge   = currentState && !lastStates[index];
+        uint32_t now         = millis();
+
+        // debounce: only treat as a valid press if enough time has passed
+        bool debouncedPress = false;
+        if (risingEdge) {
+            if ((now - lastTimestamps[index]) >= DEBOUNCE_MS) {
+                debouncedPress = true;
+                lastTimestamps[index] = now;
+            }
+        }
+
+        // update state for next call
+        lastStates[index] = currentState;
+
+        LOG_VERBOSE("Button on pin %d: %s (raw rising: %s, debounced: %s)",
+                    buttonPin,
+                    currentState   ? "HIGH" : "LOW",
+                    risingEdge     ? "YES" : "NO",
+                    debouncedPress ? "YES" : "NO");
+
+        return debouncedPress;
+    }
+
+    // For specific keypad buttons
     bool isKeypadNextPressed() {
-        const auto result = HAL::isKeypadNextPressed();
-        LOG_DEBUG("Checking if keypad next button is pressed: %s", result ? "YES" : "NO");
-        return result;
+        static bool lastState = false;
+        const bool currentState = HAL::isKeypadNextPressed();
+        const bool risingEdge = currentState && !lastState;
+        lastState = currentState;
+
+        LOG_VERBOSE("Keypad Next: %s (rising edge: %s)",
+                currentState ? "HIGH" : "LOW",
+                risingEdge ? "YES" : "NO");
+
+        return risingEdge;
     }
 
     bool isKeypadPrevPressed() {
-        const auto result = HAL::isKeypadPrevPressed();
-        LOG_DEBUG("Checking if keypad previous button is pressed: %s", result ? "YES" : "NO");
-        return result;
+        static bool lastState = false;
+        const bool currentState = HAL::isKeypadPrevPressed();
+        const bool risingEdge = currentState && !lastState;
+        lastState = currentState;
+
+        LOG_VERBOSE("Keypad Prev: %s (rising edge: %s)",
+                currentState ? "HIGH" : "LOW",
+                risingEdge ? "YES" : "NO");
+
+        return risingEdge;
     }
 
     bool isKeypadSelectPressed() {
-        const auto result = HAL::isKeypadSelectPressed();
-        LOG_DEBUG("Checking if keypad select button is pressed: %s", result ? "YES" : "NO");
-        return result;
+        static bool lastState = false;
+        const bool currentState = HAL::isKeypadSelectPressed();
+        const bool risingEdge = currentState && !lastState;
+        lastState = currentState;
+
+        LOG_VERBOSE("Keypad Select: %s (rising edge: %s)",
+                currentState ? "HIGH" : "LOW",
+                risingEdge ? "YES" : "NO");
+
+        return risingEdge;
     }
 
     bool isKeypadUpPressed() {
-        const auto result = HAL::isKeypadUpPressed();
-        LOG_DEBUG("Checking if keypad up button is pressed: %s", result ? "YES" : "NO");
-        return result;
+        static bool lastState = false;
+        const bool currentState = HAL::isKeypadUpPressed();
+        const bool risingEdge = currentState && !lastState;
+        lastState = currentState;
+
+        LOG_VERBOSE("Keypad Up: %s (rising edge: %s)",
+                currentState ? "HIGH" : "LOW",
+                risingEdge ? "YES" : "NO");
+
+        return risingEdge;
     }
 
     bool isKeypadDownPressed() {
-        const auto result = HAL::isKeypadDownPressed();
-        LOG_DEBUG("Checking if keypad down button is pressed: %s", result ? "YES" : "NO");
-        return result;
+        static bool lastState = false;
+        const bool currentState = HAL::isKeypadDownPressed();
+        const bool risingEdge = currentState && !lastState;
+        lastState = currentState;
+
+        LOG_VERBOSE("Keypad Down: %s (rising edge: %s)",
+                currentState ? "HIGH" : "LOW",
+                risingEdge ? "YES" : "NO");
+
+        return risingEdge;
     }
-} // namespace GPIO
+}  // namespace GPIO
