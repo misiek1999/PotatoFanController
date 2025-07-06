@@ -4,12 +4,13 @@
 #include <LiquidCrystal.h>
 #include "liquid_crystal_ext.h" // Extended LiquidCrystal library for Polish characters
 #include <math.h> // For NAN
+#include "persistence_manager.h"
 
 class UserInterface {
 public:
     enum State { MAIN_SCREEN, SETTINGS_MENU, EDIT_SETTING };
 
-    UserInterface(PolishLCD* lcd);
+    UserInterface(PolishLCD* lcd, PersistenceManager* persistence_manager);
     void updateDisplay();
     void handleSelect();
     void handleUp();
@@ -34,8 +35,9 @@ private:
         int step = 1; // Default step for adjustment
     };
 
-    // LCD pointer
+    // LCD and persistence manager pointers
     PolishLCD* lcd_;
+    PersistenceManager* persistence_manager_;
     // Temperature readings
     float external_temp_ = NAN; // Use NAN to indicate no reading
     float internal_temp_ = NAN; // Use NAN to indicate no reading

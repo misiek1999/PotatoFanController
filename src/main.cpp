@@ -16,23 +16,24 @@ Sensor::TemperatureSensor internal_sensor(INTERNAL_DS18B20_PIN); // Initialize t
 float external_temp = NAN; // Variable to hold external temperature
 float internal_temp = NAN; // Variable to hold internal temperature
 
-// LCD with Polish characters support
-PolishLCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);  // RS, EN, D4, D5, D6, D7
-// Function to get the singleton instance of UserInterface
-UserInterface& getSingletonUI() {
-    static UserInterface instance(&lcd); // Create a singleton instance of UserInterface
-    return instance;
-}
-
-// Variable to hold last loop time
-auto last_main_loop_time = 0UL; // Variable to track the last loop time
-
 // Variables to hold settings
 PersistenceManager* persistence_manager; // Persistence manager for settings
 PersistenceManager* getSingletonPersistenceManager() {
     static PersistenceManager instance; // Create a singleton instance of PersistenceManager
     return &instance;
 }
+
+// LCD with Polish characters support
+PolishLCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);  // RS, EN, D4, D5, D6, D7
+// Function to get the singleton instance of UserInterface
+UserInterface& getSingletonUI() {
+    const auto* persistence_manager = getSingletonPersistenceManager(); // Get the singleton instance of PersistenceManager
+    static UserInterface instance(&lcd, persistence_manager); // Create a singleton instance of UserInterface
+    return instance;
+}
+
+// Variable to hold last loop time
+auto last_main_loop_time = 0UL; // Variable to track the last loop time
 
 void setup() {
     // Initialize Serial for logging

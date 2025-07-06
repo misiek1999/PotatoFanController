@@ -3,9 +3,18 @@
 #include <LiquidCrystal.h>
 #include <liquid_crystal_ext.h>
 #include "log.h"
+#include <stdlib.h>
 
-UserInterface::UserInterface(PolishLCD* lcd)
-    : lcd_(lcd), current_state_(MAIN_SCREEN), current_index_(0) {
+UserInterface::UserInterface(PolishLCD* lcd, PersistenceManager* persistence_manager)
+    : lcd_(lcd), persistence_manager_(persistence_manager), current_state_(MAIN_SCREEN), current_index_(0) {
+    if (!lcd_) {
+        LOG_ERROR("LCD pointer is null");
+        exit(EXIT_FAILURE); // Exit if LCD pointer is null
+    }
+    if (!persistence_manager_) {
+        LOG_ERROR("PersistenceManager pointer is null");
+        exit(EXIT_FAILURE); // Exit if PersistenceManager pointer is null
+    }
     LOG_INFO("UserInterface initialized");
 }
 
