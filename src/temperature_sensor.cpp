@@ -31,7 +31,30 @@ float Sensor::TemperatureSensor::readTemperature() noexcept {
     }
 
     _sensor.requestTemperatures();
-    float temperature = _sensor.getTempCByIndex(0); // Get temperature in Celsius
-    LOG_VERBOSE("Temperature read from sensor on pin %d: %F °C", _pin, temperature);
-    return temperature;
+    float raw = _sensor.getTempCByIndex(0);
+    LOG_VERBOSE("Raw temperature read from pin %d: %F °C", _pin, raw);
+
+    // Load into moving‐average filter
+    loadIntoFilter(raw);
+    float average = _sum / static_cast<float>(_bufCount);
+    LOG_VERBOSE("Filtered (mean) temperature: %F °C", average);
+
+    return average;
+}
+
+
+void Sensor::TemperatureSensor::loadIntoFilter(float sample) {
+    // subtract oldest value from sum
+    if (_bufCount == kFilterSize) {
+        _sum -= _buffer[_bufIndex];
+    } else {
+        _bufCount++;
+    }
+
+    // store new sample
+    _buffer[_bufIndex] = sample;
+    _sum += sample;
+
+    // advance index (wrapping around)
+    _bufIndex = ( _bufIndex + 1 ) % kFilterSize;
 }
