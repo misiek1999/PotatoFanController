@@ -55,13 +55,12 @@ void setup() {
     lcd.setCursor(0,0);
     lcd.print("Display Active!");        // Test message
 
+    // Initialize the persistence manager
+    (void) getSingletonPersistenceManager();
+
     // Initialize the user interface controller
     (void) getSingletonUI();            // Initialize the UI controller
 
-    // Initialize the persistence manager
-    (void) getSingletonPersistenceManager();
-    const auto data = getSingletonPersistenceManager()->getSwitchTimeHysteresis();
-    LOG_INFO("Switch time hysteresis: %l ms", (long)data);
 
     LOG_INFO("Setup completed successfully");
 }
