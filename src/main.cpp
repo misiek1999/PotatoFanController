@@ -25,7 +25,7 @@ UserInterface& getSingletonUI() {
 }
 
 // Variable to hold last loop time
-auto last_main_loop_time = 0UL; // Variable to track the last log time
+auto last_main_loop_time = 0UL; // Variable to track the last loop time
 
 // Variables to hold settings
 PersistenceManager* persistence_manager; // Persistence manager for settings
