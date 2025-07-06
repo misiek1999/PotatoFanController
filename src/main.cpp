@@ -1,16 +1,38 @@
+#include <math.h> // For NAN
 #include <Arduino.h>    // Essential Arduino header
 #include <LiquidCrystal.h>
+#include "liquid_crystal_ext.h" // Extended LiquidCrystal library for Polish characters
 #include "log.h"       // Logging library
 #include "project_pin_definition.h" // Pin definitions for the project
 #include "pin_duplication_check.h" // Pin duplication check
 #include "temperature_sensor.h" // Temperature sensor library
 #include "gpio_manager.h"
+#include "persistence_manager.h"
+#include "user_interface.h" // User interface controller
 
+// DS18B20 sensors and temp readings
 Sensor::TemperatureSensor external_sensor(EXTERNAL_DS18B20_PIN); // Initialize temperature sensor on external sensor pin
 Sensor::TemperatureSensor internal_sensor(INTERNAL_DS18B20_PIN); // Initialize temperature sensor on internal sensor pin
+float external_temp = NAN; // Variable to hold external temperature
+float internal_temp = NAN; // Variable to hold internal temperature
 
-LiquidCrystal lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);  // RS, EN, D4, D5, D6, D7
+// LCD with Polish characters support
+PolishLCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);  // RS, EN, D4, D5, D6, D7
+// Function to get the singleton instance of UserInterface
+UserInterface& getSingletonUI() {
+    static UserInterface instance(&lcd); // Create a singleton instance of UserInterface
+    return instance;
+}
 
+// Variable to hold last loop time
+auto last_main_loop_time = 0UL; // Variable to track the last log time
+
+// Variables to hold settings
+PersistenceManager* persistence_manager; // Persistence manager for settings
+PersistenceManager* getSingletonPersistenceManager() {
+    static PersistenceManager instance; // Create a singleton instance of PersistenceManager
+    return &instance;
+}
 
 void setup() {
     // Initialize Serial for logging
@@ -26,77 +48,65 @@ void setup() {
     // Initialize the temperature sensor
     external_sensor.begin();
     internal_sensor.begin();
+
+    // Initialize the LCD
+    lcd.begin(16, 2);                   // Set dimensions (16x2)
+    lcd.setCursor(0,0);
+    lcd.print("Display Active!");        // Test message
+
+    // Initialize the user interface controller
+    (void) getSingletonUI();            // Initialize the UI controller
+
+    // Initialize the persistence manager
+    (void) getSingletonPersistenceManager();
+    const auto data = getSingletonPersistenceManager()->getSwitchTimeHysteresis();
+    LOG_INFO("Switch time hysteresis: %l ms", (long)data);
+
     LOG_INFO("Setup completed successfully");
 }
 
 void loop() {
-    // Example log messages
-    LOG_VERBOSE("Verbose log message");
-
-    // Simulate some operations
-    for (int i = 0; i < 5; ++i) {
-        LOG_NOTICE("Iteration %d", i);
-        if (external_sensor.isConnected()) {
-            float temperature = external_sensor.readTemperature();
-            LOG_INFO("Current temperature: %F °C", temperature);
-        } else {
-            LOG_ERROR("Temperature sensor not connected!");
-        }
-        if (internal_sensor.isConnected()) {
-            float internal_temp = internal_sensor.readTemperature();
-            LOG_INFO("Internal temperature: %F °C", internal_temp);
-        } else {
-            LOG_ERROR("Internal temperature sensor not connected!");
-        }
-        const auto res = GPIO::isKeypadDownPressed(); // Check if the keypad down button is pressed
-        GPIO::isKeypadUpPressed();   // Check if the keypad up button is pressed
-        GPIO::isKeypadSelectPressed(); // Check if the keypad select button is pressed
-        GPIO::isKeypadNextPressed(); // Check if the keypad next button is pressed
-        GPIO::isKeypadPrevPressed(); // Check if the keypad previous button is pressed
-        delay(1000);  // Wait for a second
+    last_main_loop_time = millis(); // Update the last main loop time
+    if (external_sensor.isConnected()) {
+        external_temp = external_sensor.readTemperature();
+        LOG_INFO("Current temperature: %F °C", external_temp);
+    } else {
+        external_temp = NAN; // Set to NAN if sensor is not connected
+        LOG_ERROR("Temperature sensor not connected!");
     }
+    if (internal_sensor.isConnected()) {
+        internal_temp = internal_sensor.readTemperature();
+        LOG_INFO("Internal temperature: %F °C", internal_temp);
+    } else {
+        internal_temp = NAN; // Set to NAN if sensor is not connected
+        LOG_ERROR("Internal temperature sensor not connected!");
+    }
+    // Get the singleton instance of UserInterface
+    UserInterface& userInterface = getSingletonUI();
+
+    // Update the user interface with the latest temperature readings
+    userInterface.setExternalTemperature(external_temp);
+    userInterface.setInternalTemperature(internal_temp);
+
+    // Poll user inputs
+    if (GPIO::isKeypadSelectPressed()) {
+        userInterface.handleSelect();  // Handle select button press
+    }
+    if (GPIO::isKeypadUpPressed()) {
+        userInterface.handleUp();      // Handle up button press
+    }
+    if (GPIO::isKeypadDownPressed()) {
+        userInterface.handleDown();    // Handle down button press
+    }
+    if (GPIO::isKeypadNextPressed()) {
+        userInterface.handleNext();    // Handle next button press
+    }
+    if (GPIO::isKeypadPrevPressed()) {
+        userInterface.handlePrev();    // Handle previous button press
+    }
+    userInterface.updateDisplay();  // Update the display based on the current state
+
+    const auto current_time = millis();
+    LOG_DEBUG("Main loop duration %l ms", current_time - last_main_loop_time);
+    delay(200);  // Delay to prevent excessive CPU usage
 }
-
-
-// // // LCD Pin Configuration (Standard for Keypad Shields)
-// LiquidCrystal lcd(8, 9, 4, 5, 6, 7);  // RS, EN, D4, D5, D6, D7
-// // LiquidCrystal lcd(7, 8,  9, 10, 11, 12);  // RS, EN, D4, D5, D6, D7
-
-
-// // Backlight Control (Typically pin 10)
-// const int BACKLIGHT_PIN = 10;
-
-// // Button Analog Pin
-// const int BUTTON_PIN = A0;
-
-// void setup() {
-//   // Initialize backlight control
-//   pinMode(BACKLIGHT_PIN, OUTPUT);
-//   digitalWrite(BACKLIGHT_PIN, HIGH);  // Start with backlight ON
-
-//   // Initialize LCD
-//   lcd.begin(16, 2);                   // Set dimensions (16x2)
-//   lcd.setCursor(0,0);
-//   lcd.print("Display Active!");        // Test message
-//   delay(1000);                         // Show initial message
-// }
-
-// void loop() {
-//   // Turn off backlight after 5 seconds of inactivity
-//   static unsigned long lastActive = millis();
-
-//   if (analogRead(BUTTON_PIN) < 1000) {  // If any button pressed
-//     lastActive = millis();
-//     digitalWrite(BACKLIGHT_PIN, HIGH);  // Ensure backlight ON
-//     lcd.clear();
-//     lcd.print("Button pressed!");
-//     delay(500);
-//   }
-
-//   // Auto-backlight off after 5s
-//   if (millis() - lastActive > 5000) {
-//     digitalWrite(BACKLIGHT_PIN, LOW);
-//     lcd.clear();
-//     // lcd.noDisplay();  // Additional power saving
-//   }
-// }
