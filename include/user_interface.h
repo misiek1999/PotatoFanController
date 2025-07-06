@@ -1,5 +1,4 @@
-#ifndef D1ROBOTUI_H
-#define D1ROBOTUI_H
+#pragma once
 
 #include <LiquidCrystal.h>
 #include "liquid_crystal_ext.h" // Extended LiquidCrystal library for Polish characters
@@ -63,5 +62,3 @@ private:
     void adjustSetting(int delta);
     void saveSetting();
 };
-
-#endif
