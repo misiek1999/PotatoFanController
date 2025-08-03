@@ -69,7 +69,7 @@ public:
         return LiquidCrystal::print(f);
     }
 private:
-    static const uint8_t PolishLCD::_polishChars[8][8] = {
+    static constexpr const uint8_t _polishChars[8][8] = {
         // ą
         {0b00100, 0b00000, 0b01110, 0b10001, 0b10001, 0b01111, 0b00010, 0b00100},
         // ć
@@ -90,7 +90,7 @@ private:
 
     void loadPolishChars() {
         for (uint8_t i = 0; i < 8; i++) {
-            createChar(i, _polishChars[i]);
+            createChar(i, const_cast<uint8_t*>(_polishChars[i]));
         }
     }
 };
