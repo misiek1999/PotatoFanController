@@ -74,6 +74,16 @@ void PersistenceManager::setMinimalExternalTemperature(float value) {
     LOG_INFO("Minimal external temperature set to %F", value);
 }
 
+float PersistenceManager::getMaximalExternalTemperature() const {
+    return data_.maximal_external_temperature;
+}
+
+void PersistenceManager::setMaximalExternalTemperature(float value) {
+    data_.maximal_external_temperature = value;
+    saveData(); // Save updated data to EEPROM
+    LOG_INFO("Maximal external temperature set to %F", value);
+}
+
 void PersistenceManager::setTemperatureDifferenceHysteresis(float value) {
     data_.temperature_difference_hysteresis = value;
     saveData(); // Save updated data to EEPROM
