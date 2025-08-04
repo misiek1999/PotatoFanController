@@ -8,6 +8,7 @@
 #include "temperature_sensor.h" // Temperature sensor library
 #include "gpio_manager.h"
 #include "persistence_manager.h"
+#include "persistence_manager_instance.h" // Singleton instance of PersistenceManager
 #include "user_interface.h" // User interface controller
 
 // DS18B20 sensors and temp readings
@@ -15,13 +16,6 @@ Sensor::TemperatureSensor external_sensor(EXTERNAL_DS18B20_PIN); // Initialize t
 Sensor::TemperatureSensor internal_sensor(INTERNAL_DS18B20_PIN); // Initialize temperature sensor on internal sensor pin
 float external_temp = NAN; // Variable to hold external temperature
 float internal_temp = NAN; // Variable to hold internal temperature
-
-// Variables to hold settings
-PersistenceManager* persistence_manager; // Persistence manager for settings
-PersistenceManager* getSingletonPersistenceManager() {
-    static PersistenceManager instance; // Create a singleton instance of PersistenceManager
-    return &instance;
-}
 
 // LCD with Polish characters support
 PolishLCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);  // RS, EN, D4, D5, D6, D7
