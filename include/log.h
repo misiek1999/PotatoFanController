@@ -11,7 +11,8 @@ enum class LogSource {
 };
 
 inline void initLog() {
-    Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+    // Log.begin(LOG_LEVEL_TRACE, &Serial);
+    Log.begin(LOG_LEVEL_TRACE, &Serial);
     Log.noticeln("Log initialized");
 }
 
@@ -72,7 +73,15 @@ inline unsigned long log_number = {};
 #define LOG_INFO(MSG, ...) Log.infoln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define LOG_DEBUG(MSG, ...) Log.traceln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
 #define LOG_VERBOSE(MSG, ...) Log.verboseln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__)
+#define LOG_FATAL(MSG, ...) Log.fatalln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__); \
+    while(1) { \
+        delay(1000); \
+    } // Infinite loop to halt execution after a fatal error
 #else
+#define LOG_FATAL(MSG, ...) Log.fatalln(RAM_OPT(LOG_PREFIX MSG), log_number++, LOG_MS, __FILENAME__, __LINE__, ##__VA_ARGS__); \
+    while(1) { \
+        delay(1000); \
+    } // Infinite loop to halt execution after a fatal error
 #define LOG_ERROR(MSG, ...)
 #define LOG_WARNING(MSG, ...)
 #define LOG_NOTICE(MSG, ...)
