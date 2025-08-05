@@ -45,6 +45,7 @@ void setup() {
     internal_sensor.begin();
 
     // Initialize the LCD
+    lcd.beginPolish(16, 2); // Initialize LCD with Polish characters support
     lcd.begin(16, 2);                   // Set dimensions (16x2)
     lcd.setCursor(0,0);
     lcd.print("Aktywacja!");        // Test message
