@@ -64,10 +64,10 @@ void loop() {
     last_main_loop_time = millis(); // Update the last main loop time
     if (external_sensor.isConnected()) {
         external_temp = external_sensor.readTemperature();
-        LOG_INFO("Current temperature: %F °C", external_temp);
+        LOG_INFO("External temperature: %F °C", external_temp);
     } else {
         external_temp = NAN; // Set to NAN if sensor is not connected
-        LOG_ERROR("Temperature sensor not connected!");
+        LOG_ERROR("External temperature sensor not connected!");
     }
     if (internal_sensor.isConnected()) {
         internal_temp = internal_sensor.readTemperature();
