@@ -4,7 +4,7 @@
 
 
 // Variables to hold settings
-inline PersistenceManager* getSingletonPersistenceManager() {
+inline PersistenceManager* getPersistenceManagerInstance() {
     static PersistenceManager instance; // Create a singleton instance of PersistenceManager
     return &instance;
 }
@@ -12,33 +12,33 @@ inline PersistenceManager* getSingletonPersistenceManager() {
 
 // c functions of PersistenceManager singleton
 inline float getMinimalExternalTemperature() {
-    return getSingletonPersistenceManager()->getMinimalExternalTemperature();
+    return getPersistenceManagerInstance()->getMinimalExternalTemperature();
 }
 
 inline float getMaximalExternalTemperature() {
-    return getSingletonPersistenceManager()->getMaximalExternalTemperature();
+    return getPersistenceManagerInstance()->getMaximalExternalTemperature();
 }
 
 inline float getTemperatureDifferenceHysteresis() {
-    return getSingletonPersistenceManager()->getTemperatureDifferenceHysteresis();
+    return getPersistenceManagerInstance()->getTemperatureDifferenceHysteresis();
 }
 
 inline size_t getSwitchTimeHysteresis() {
-    return getSingletonPersistenceManager()->getSwitchTimeHysteresis();
+    return getPersistenceManagerInstance()->getSwitchTimeHysteresis();
 }
 
 inline void setMinimalExternalTemperature(float value) {
-    getSingletonPersistenceManager()->setMinimalExternalTemperature(value);
+    getPersistenceManagerInstance()->setMinimalExternalTemperature(value);
 }
 
 inline void setMaximalExternalTemperature(float value) {
-    getSingletonPersistenceManager()->setMaximalExternalTemperature(value);
+    getPersistenceManagerInstance()->setMaximalExternalTemperature(value);
 }
 
 inline void setTemperatureDifferenceHysteresis(float value) {
-    getSingletonPersistenceManager()->setTemperatureDifferenceHysteresis(value);
+    getPersistenceManagerInstance()->setTemperatureDifferenceHysteresis(value);
 }
 
 inline void setSwitchTimeHysteresis(size_t value) {
-    getSingletonPersistenceManager()->setSwitchTimeHysteresis(value);
+    getPersistenceManagerInstance()->setSwitchTimeHysteresis(value);
 }
