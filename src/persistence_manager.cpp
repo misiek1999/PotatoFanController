@@ -35,7 +35,6 @@ void PersistenceManager::loadDefaults() {
     data_.minimal_external_temperature = DEFAULT_MINIMAL_EXTERNAL_TEMPERATURE;
     data_.temperature_difference_hysteresis = DEFAULT_TEMPERATURE_DIFFERENCE_HYSTERESIS;
     data_.switch_time_hysteresis = DEFAULT_SWITCH_TIME_HYSTERESIS;
-    LOG_INFO("Default values loaded ");
 }
 
 void PersistenceManager::saveData() {
@@ -71,7 +70,6 @@ size_t PersistenceManager::getSwitchTimeHysteresis() const {
 void PersistenceManager::setMinimalExternalTemperature(float value) {
     data_.minimal_external_temperature = value;
     saveData(); // Save updated data to EEPROM
-    LOG_INFO("Minimal external temperature set to %F", value);
 }
 
 float PersistenceManager::getMaximalExternalTemperature() const {
@@ -81,19 +79,16 @@ float PersistenceManager::getMaximalExternalTemperature() const {
 void PersistenceManager::setMaximalExternalTemperature(float value) {
     data_.maximal_external_temperature = value;
     saveData(); // Save updated data to EEPROM
-    LOG_INFO("Maximal external temperature set to %F", value);
 }
 
 void PersistenceManager::setTemperatureDifferenceHysteresis(float value) {
     data_.temperature_difference_hysteresis = value;
     saveData(); // Save updated data to EEPROM
-    LOG_INFO("Temperature difference hysteresis set to %F", value);
 }
 
 void PersistenceManager::setSwitchTimeHysteresis(size_t value) {
     data_.switch_time_hysteresis = value;
     saveData(); // Save updated data to EEPROM
-    LOG_INFO("Switch time hysteresis set to %l seconds", static_cast<long>(value));
 }
 
 bool PersistenceManager::checkCRC() const {
