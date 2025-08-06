@@ -13,7 +13,6 @@ Sensor::TemperatureSensor::TemperatureSensor(uint8_t pin):
 
 void Sensor::TemperatureSensor::begin() {
     _sensor.begin();
-    LOG_INFO("Temperature sensor on pin %d started", _pin);
     _sensor.setResolution(kMaxTempRes);
     LOG_DEBUG("Temperature sensor on pin %d set to resolution %d bits", _pin, kMaxTempRes);
 }
