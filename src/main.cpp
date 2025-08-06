@@ -37,8 +37,7 @@ void setup() {
 
     //initialize GPIO pins
     if (!GPIO::initGPIO()) {
-        LOG_ERROR("Failed to initialize GPIO pins!");
-        return; // Exit setup if GPIO initialization fails
+        LOG_FATAL("Failed to initialize GPIO pins!");
     }
     // Initialize the temperature sensor
     external_sensor.begin();
@@ -56,8 +55,7 @@ void setup() {
     // Initialize the user interface controller
     (void) getSingletonUI();            // Initialize the UI controller
 
-
-    LOG_INFO("Setup completed successfully");
+    LOG_INFO("Setup completed");
 }
 
 void loop() {
