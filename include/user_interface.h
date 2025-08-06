@@ -4,12 +4,13 @@
 #include "liquid_crystal_ext.h" // Extended LiquidCrystal library for Polish characters
 #include <math.h> // For NAN
 #include "persistence_manager.h"
+#include "setting.h"
 
 class UserInterface {
 public:
     enum State { MAIN_SCREEN, SETTINGS_MENU, EDIT_SETTING };
 
-    UserInterface(PolishLCD* lcd, PersistenceManager* persistence_manager);
+    explicit UserInterface(PolishLCD* lcd);
     void updateDisplay();
     void handleSelect();
     void handleUp();
@@ -17,26 +18,14 @@ public:
     void handleNext();
     void handlePrev();
 
-    void addSetting(const char* name, int* value_ptr, int min_val, int max_val);
-
     void setFanState(bool state) { is_fan_on_ = state; }
     void setExternalTemperature(float temp) { external_temp_ = temp; }
     void setInternalTemperature(float temp) { internal_temp_ = temp; }
 
 private:
-    // UI settings
-    static const int MAX_SETTINGS = 8;
-    struct Setting {
-        const char* name;
-        int* value_ptr;
-        int min_val;
-        int max_val;
-        int step = 1; // Default step for adjustment
-    };
 
     // LCD and persistence manager pointers
     PolishLCD* lcd_;
-    PersistenceManager* persistence_manager_;
     // Temperature readings
     float external_temp_ = NAN; // Use NAN to indicate no reading
     float internal_temp_ = NAN; // Use NAN to indicate no reading
@@ -46,9 +35,9 @@ private:
 
     // Current state and settings
     State current_state_;
-    int current_index_;
-    Setting settings_[MAX_SETTINGS];
-    int num_settings_ = 0;
+    ISetting** settings_array_; // Array of settings
+    size_t current_setting_ = 0; // Index of the current setting being edited
+    size_t total_num_settings_ = 0; // Total number of settings
 
     // Helper methods
     void showMainScreen();
@@ -61,4 +50,5 @@ private:
     void navigateSettings(int direction);
     void adjustSetting(int delta);
     void saveSetting();
+    void discardSetting();
 };

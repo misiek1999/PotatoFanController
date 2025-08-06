@@ -3,18 +3,21 @@
 #include <LiquidCrystal.h>
 #include <liquid_crystal_ext.h>
 #include "log.h"
-#include <stdlib.h>
+#include "settings_array.h"
 
-UserInterface::UserInterface(PolishLCD* lcd, PersistenceManager* persistence_manager)
-    : lcd_(lcd), persistence_manager_(persistence_manager), current_state_(MAIN_SCREEN), current_index_(0) {
+UserInterface::UserInterface(PolishLCD* lcd)
+    : lcd_(lcd), current_state_(MAIN_SCREEN), current_setting_(0) {
     if (!lcd_) {
-        LOG_ERROR("LCD pointer is null");
-        exit(EXIT_FAILURE); // Exit if LCD pointer is null
+        LOG_FATAL("LCD pointer is null");
     }
-    if (!persistence_manager_) {
-        LOG_ERROR("PersistenceManager pointer is null");
-        exit(EXIT_FAILURE); // Exit if PersistenceManager pointer is null
+    // Get array of settings
+    settings_array_ = createSettings(total_num_settings_);
+    if (total_num_settings_ == 0) {
+        LOG_WARNING("No settings available");
+    } else {
+        LOG_INFO("Loaded %d settings", total_num_settings_);
     }
+
     LOG_INFO("UserInterface initialized");
 }
 
@@ -38,7 +41,7 @@ void UserInterface::handleSelect() {
             enterSettingsMenu();
             break;
         case SETTINGS_MENU:
-            if (current_index_ < num_settings_) {
+            if (current_setting_ < total_num_settings_) {
                 enterEditSetting();
             } else {
                 exitSettingsMenu();
@@ -89,17 +92,12 @@ void UserInterface::handleNext() {
             // No action in main screen
             break;
         case SETTINGS_MENU:
-            navigateSettings(1);
+            if (current_setting_ < total_num_settings_) {
+                enterEditSetting();
+            }
             break;
         case EDIT_SETTING:
-            // Save and move to next setting
-            saveSetting();
-            if (current_index_ < num_settings_ - 1) {
-                current_index_++;
-                showEditSetting();
-            } else {
-                exitEditSetting();
-            }
+            // No action in edit setting
             break;
     }
     updateDisplay();
@@ -111,28 +109,15 @@ void UserInterface::handlePrev() {
             // No action in main screen
             break;
         case SETTINGS_MENU:
-            navigateSettings(-1);
+            exitSettingsMenu();
             break;
         case EDIT_SETTING:
-            // Save and move to previous setting
-            saveSetting();
-            if (current_index_ > 0) {
-                current_index_--;
-                showEditSetting();
-            } else {
-                exitEditSetting();
-            }
+            // Discard changes and move back to settings menu
+            discardSetting();
+            exitEditSetting();
             break;
     }
     updateDisplay();
-}
-
-void UserInterface::addSetting(const char* name, int* value_ptr, int min_val,
-                           int max_val) {
-    if (num_settings_ < MAX_SETTINGS) {
-        settings_[num_settings_] = {name, value_ptr, min_val, max_val};
-        num_settings_++;
-    }
 }
 
 void UserInterface::showMainScreen() {
@@ -144,7 +129,7 @@ void UserInterface::showMainScreen() {
         lcd_->print(external_temp_);
         lcd_->print(" C");
     } else {
-        lcd_->print("Blad");
+        lcd_->print("Błąd");
     }
     // Display internal temperature
     lcd_->setCursor(0, 1);
@@ -165,30 +150,36 @@ void UserInterface::showMainScreen() {
 void UserInterface::showSettingsMenu() {
     lcd_->clear();
     lcd_->setCursor(0, 0);
-    lcd_->print("Ustawienia:");
+    lcd_->print("Ustawienia:  (");
+    lcd_->print(current_setting_ + 1);
+    lcd_->print(")");
 
     lcd_->setCursor(0, 1);
-    if (current_index_ < num_settings_) {
-        lcd_->print(settings_[current_index_].name);
+    if (current_setting_ < total_num_settings_) {
+        lcd_->print("> ");
+        lcd_->print(settings_array_[current_setting_]->getScreenText());
     } else {
-        lcd_->print("> Wróć");
+        lcd_->print("> Wróc do menu");
     }
 }
 
 void UserInterface::showEditSetting() {
     lcd_->clear();
     lcd_->setCursor(0, 0);
-    lcd_->print("Wartość: ");
-    lcd_->print(settings_[current_index_].name);
+    lcd_->print(settings_array_[current_setting_]->getScreenText());
 
     lcd_->setCursor(0, 1);
     lcd_->print("Wartość: ");
-    lcd_->print(*(settings_[current_index_].value_ptr));
+    char value_buffer[5];
+    settings_array_[current_setting_]->getValueAsString(value_buffer, sizeof(value_buffer));
+    lcd_->print(value_buffer);
+
+    LOG_WARNING("Editing setting: %s", value_buffer);
 }
 
 void UserInterface::enterSettingsMenu() {
     current_state_ = SETTINGS_MENU;
-    current_index_ = 0;
+    current_setting_ = 0;
 }
 
 void UserInterface::exitSettingsMenu() {
@@ -197,6 +188,9 @@ void UserInterface::exitSettingsMenu() {
 
 void UserInterface::enterEditSetting() {
     current_state_ = EDIT_SETTING;
+    if (current_setting_ < total_num_settings_) {
+        settings_array_[current_setting_]->loadDataFromPersistence();
+    }
 }
 
 void UserInterface::exitEditSetting() {
@@ -204,18 +198,42 @@ void UserInterface::exitEditSetting() {
 }
 
 void UserInterface::navigateSettings(int direction) {
-    current_index_ += direction;
-    if (current_index_ < 0) current_index_ = num_settings_;
-    if (current_index_ > num_settings_) current_index_ = 0;
+    if (current_setting_ + direction <= total_num_settings_) {
+        current_setting_ += direction;
+        LOG_DEBUG("Navigated to setting %zum dir %d", current_setting_, direction);
+    } else {
+        LOG_DEBUG("Attempted to navigate out of bounds, current setting: %zu, total settings: %zu, dir: %d", current_setting_, total_num_settings_, direction);
+    }
 }
 
 void UserInterface::adjustSetting(int delta) {
-    Setting& s = settings_[current_index_];
-    *(s.value_ptr) = constrain(*(s.value_ptr) + delta, s.min_val, s.max_val);
+    if (current_setting_ < total_num_settings_) {
+        if (delta > 0) {
+            settings_array_[current_setting_]->increase();
+        } else if (delta < 0) {
+            settings_array_[current_setting_]->decrease();
+        }
+        LOG_INFO("Adjusted setting: %s by %d", settings_array_[current_setting_]->getName(), delta);
+    } else {
+        LOG_WARNING("No setting to adjust at index %zu", current_setting_);
+    }
     updateDisplay();
 }
 
 void UserInterface::saveSetting() {
-    // Placeholder for saving to EEPROM if needed
-    // EEPROM.put(address, *(settings_[current_index_].value_ptr));
+    if (current_setting_ < total_num_settings_) {
+        settings_array_[current_setting_]->save();
+        LOG_INFO("Saved setting: %s", settings_array_[current_setting_]->getName());
+    } else {
+        LOG_WARNING("No setting to save at index %zu", current_setting_);
+    }
+}
+
+void UserInterface::discardSetting() {
+    if (current_setting_ < total_num_settings_) {
+        settings_array_[current_setting_]->discard();
+        LOG_INFO("Discarded changes for setting: %s", settings_array_[current_setting_]->getName());
+    } else {
+        LOG_WARNING("No setting to discard at index %zu", current_setting_);
+    }
 }
