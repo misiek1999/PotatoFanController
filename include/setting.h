@@ -87,6 +87,7 @@ public:
         if constexpr (gpt::is_integral_v<T>) {
             snprintf(buffer, buffer_size, "%d", value_);
         } else if constexpr (gpt::is_floating_point_v<T>) {
+            (void) buffer_size; // Unused in this case
             dtostrf(value_, 2, 1, buffer); // Format float with 2 decimal places
         } else {
             snprintf(buffer, buffer_size, "Unknown");
@@ -109,7 +110,8 @@ public:
             snprintf(buffer, buffer_size, "%s: %d", screen_text_, value_);
         }
         else if constexpr (gpt::is_floating_point_v<T>) {
-            snprintf(buffer, buffer_size, "%s: %F", screen_text_, value_);
+            (void) buffer_size; // Unused in this case
+            dtostrf(value_, 2, 1, buffer); // Format float with 2 decimal places
         }
         else {
             snprintf(buffer, buffer_size, "Unsupported type");
