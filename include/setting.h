@@ -19,6 +19,7 @@ public:
     virtual void getDescription(char* buffer, size_t buffer_size) = 0;
     virtual void getValueAsString(char* buffer, size_t buffer_size) const = 0;
     virtual const char* getScreenText() const = 0; // For displaying on the screen
+    virtual void loadDataFromPersistence() = 0;
 };
 
 /**
@@ -62,7 +63,11 @@ public:
         screen_text_[kNameMaxLen - 1] = '\0';
 
         // Initialize from storage
-        value_      = get_value_func_();
+        if (get_value_func_ == nullptr) {
+            value_ = T(); // Default initialization
+        } else {
+            value_ = get_value_func_();
+        }
         savedValue_ = value_;
     }
 
@@ -95,6 +100,9 @@ public:
     }
 
     bool save() const override {
+        if (set_value_func_ == nullptr) {
+            return false;
+        }
         set_value_func_(value_);
         // after persisting, update savedValue_
         savedValue_ = value_;
@@ -118,6 +126,13 @@ public:
         }
     }
 
+    void loadDataFromPersistence() override {
+        if (get_value_func_ == nullptr) {
+            return;
+        }
+        value_ = get_value_func_();
+    }
+
 private:
     char              name_[kNameMaxLen];
     char              screen_text_[kNameMaxLen];
@@ -126,4 +141,77 @@ private:
     T                 value_;
     mutable T         savedValue_;
     T                 step_;
+};
+
+
+
+template<>
+class Setting<void> : public ISetting {
+    using CallbackFunc = void(*)(void);
+
+public:
+    /**
+     * @param name              Human-readable name (must be shorter than kNameMaxLen)
+     * @param callback_func     Function to call when the setting is changed
+     */
+    Setting(const char* name,
+            const char* screen_text,
+            CallbackFunc callback_func)
+      : callback_func_{callback_func}
+    {
+        if (strlen(name) >= kNameMaxLen) {
+            LOG_FATAL("Setting name exceeds maximum length");
+        }
+        strncpy(name_, name, kNameMaxLen);
+        if (strlen(screen_text) >= kNameMaxLen) {
+            LOG_FATAL("Setting screen text exceeds maximum length");
+        }
+        strncpy(screen_text_, screen_text, kNameMaxLen);
+
+        name_[kNameMaxLen - 1] = '\0';
+        screen_text_[kNameMaxLen - 1] = '\0';
+    }
+
+    // — ISetting interface —
+    void increase() override {
+    }
+
+    void decrease() override {
+    }
+
+    const char* getName() const override {
+        return name_;
+    }
+
+    const char* getScreenText() const override {
+        return screen_text_;
+    }
+
+    void getValueAsString(char* buffer, size_t buffer_size) const override {
+        snprintf(buffer, buffer_size, "Usuniecie ustawień");
+    }
+
+    bool save() const override {
+        if (callback_func_ == nullptr) {
+            return false;
+        }
+        callback_func_();
+        return true;
+    }
+
+    void discard() override {
+    }
+
+    void getDescription(char* buffer, size_t buffer_size) override {
+        snprintf(buffer, buffer_size, "%s: Usuniecie ustawień", screen_text_);
+    }
+
+    void loadDataFromPersistence() override {
+    }
+
+private:
+static constexpr size_t kNameMaxLen = 16; // Maximum length of the setting name
+    char              name_[kNameMaxLen];
+    char              screen_text_[kNameMaxLen];
+    CallbackFunc      callback_func_;
 };
