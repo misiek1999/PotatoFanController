@@ -35,8 +35,10 @@ public:
     void setTemperatureDifferenceHysteresis(float value);
     void setSwitchTimeHysteresis(size_t value);
 
+    void resetToDefaults();
+
 private:
-    void checkIsDataPresent();
+    bool checkIsDataPresent();
     void loadDefaults();
     void saveData();
     void loadData();
