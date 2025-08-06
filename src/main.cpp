@@ -20,9 +20,8 @@ float internal_temp = NAN; // Variable to hold internal temperature
 // LCD with Polish characters support
 PolishLCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);  // RS, EN, D4, D5, D6, D7
 // Function to get the singleton instance of UserInterface
-UserInterface& getSingletonUI() {
-    const auto* persistence_manager = getSingletonPersistenceManager(); // Get the singleton instance of PersistenceManager
-    static UserInterface instance(&lcd, persistence_manager); // Create a singleton instance of UserInterface
+UserInterface& getUIInstance() {
+    static UserInterface instance(&lcd); // Create a singleton instance of UserInterface
     return instance;
 }
 
@@ -50,10 +49,9 @@ void setup() {
     lcd.print("Aktywacja!");        // Test message
 
     // Initialize the persistence manager
-    (void) getSingletonPersistenceManager();
-
+    (void) getPersistenceManagerInstance();
     // Initialize the user interface controller
-    (void) getSingletonUI();            // Initialize the UI controller
+    (void) getUIInstance();            // Initialize the UI controller
 
     LOG_INFO("Setup completed");
 }
@@ -75,7 +73,7 @@ void loop() {
         LOG_ERROR("Internal temperature sensor not connected!");
     }
     // Get the singleton instance of UserInterface
-    UserInterface& userInterface = getSingletonUI();
+    UserInterface& userInterface = getUIInstance();
 
     // Update the user interface with the latest temperature readings
     userInterface.setExternalTemperature(external_temp);
