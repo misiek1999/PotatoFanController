@@ -42,3 +42,7 @@ inline void setTemperatureDifferenceHysteresis(float value) {
 inline void setSwitchTimeHysteresis(size_t value) {
     getPersistenceManagerInstance()->setSwitchTimeHysteresis(value);
 }
+
+inline void resetSettings() {
+    getPersistenceManagerInstance()->resetToDefaults();
+}
